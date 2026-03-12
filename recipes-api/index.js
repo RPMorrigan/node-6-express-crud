@@ -51,17 +51,30 @@ app.get("/get-all-recipes", async (req, res) => {
 
 // 2. GET /get-one-recipe/:index
 
+
+// Here app is actually running the express method to help set up our endpoint
+// 'get' is the request type that this endpoint makes for us.
+// '/get-one-recipe/:index' is the endpoint we type in for our request, with :index being a dynamic variable we code in later on.
+// Because we are working with a restful api, we need to make sure to add async as we have to wait for the reply from the api.
+
 app.get("/get-one-recipe/:index", async (req, res) => {
 
+    // here we're impording and reading the json file and specifying the character type.
     const data = await fs.readFile('recipes-data.json', 'utf8');
+
+    // Here we're parsing our data into a data object
     const recipes = JSON.parse(data);
 
+    // This is the dynamic variable that accepts input from the user by typing it into the correct position in the request url.
     let index = req.params.index;
 
+    // I've added some formatting to make the data more legible.
+    // 'recipes[index]' accesses the specific recipe.
     let recipe = recipes[index].name.toUpperCase() + '\n'
                  + 'Method: ' + recipes[index].cookingMethod + '\n'
                  + 'Ingredients: ' + recipes[index].ingredients;
 
+    // This returns the results to the user as a string
     res.send(recipe);
 
 
