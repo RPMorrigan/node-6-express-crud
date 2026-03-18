@@ -20,19 +20,7 @@ app.listen(port, () => {
 
 // 1. getAllRecipes()
 
-// 2. getOneRecipe(index)
-
-// 3. getAllRecipeNames()
-
-// 4. getRecipesCount()
-
-// ---------------------------------
-// API Endpoints
-// ---------------------------------
-
-// 1. GET /get-all-recipes
-
-app.get("/get-all-recipes", async (req, res) => {
+async function getAllRecipes() {
 
     const data = await fs.readFile('recipes-data.json', 'utf8');
     const recipes = JSON.parse(data);
@@ -44,7 +32,71 @@ app.get("/get-all-recipes", async (req, res) => {
             + 'Method: ' + recipes[recipe].cookingMethod + '.\n'
             + 'Ingredients: ' + recipes[recipe].ingredients + '.\n \n';
     }
+
+    return list;
+
+}
+
+// 2. getOneRecipe(index)
+
+async function getOneRecipe(index) {
+
+    const data = await fs.readFile('recipes-data.json', 'utf8');
+
+    // Here we're parsing our data into a data object
+    const recipes = JSON.parse(data);
+
+    // I've added some formatting to make the data more legible.
+    // 'recipes[index]' accesses the specific recipe.
+    let recipe = recipes[index].name.toUpperCase() + '\n'
+        + 'Method: ' + recipes[index].cookingMethod + '\n'
+        + 'Ingredients: ' + recipes[index].ingredients;
     
+    return recipe;
+    
+}
+
+
+// 3. getAllRecipeNames()
+
+async function getAllRecipeNames() {
+
+    const data = await fs.readFile('recipes-data.json', 'utf8');
+    const recipes = JSON.parse(data);
+
+    let list = '';
+
+    for (let recipe in recipes) {
+        list += recipes[recipe].name + '\n \n';
+
+    }
+    
+    return list;
+
+}
+
+// 4. getRecipesCount()
+
+async function getRecipesCount() {
+
+    const data = await fs.readFile('recipes-data.json', 'utf8');
+    const recipes = JSON.parse(data);
+
+    const listLength = `We have ${recipes.length} recipes in our cookbook! 🍰`;
+
+    return listLength;
+
+}
+
+// ---------------------------------
+// API Endpoints
+// ---------------------------------
+
+// 1. GET /get-all-recipes
+
+app.get("/get-all-recipes", async (req, res) => {
+
+    const list = await getAllRecipes();
     res.send(list);
 
 })
@@ -59,22 +111,7 @@ app.get("/get-all-recipes", async (req, res) => {
 
 app.get("/get-one-recipe/:index", async (req, res) => {
 
-    // here we're impording and reading the json file and specifying the character type.
-    const data = await fs.readFile('recipes-data.json', 'utf8');
-
-    // Here we're parsing our data into a data object
-    const recipes = JSON.parse(data);
-
-    // This is the dynamic variable that accepts input from the user by typing it into the correct position in the request url.
-    let index = req.params.index;
-
-    // I've added some formatting to make the data more legible.
-    // 'recipes[index]' accesses the specific recipe.
-    let recipe = recipes[index].name.toUpperCase() + '\n'
-                 + 'Method: ' + recipes[index].cookingMethod + '\n'
-                 + 'Ingredients: ' + recipes[index].ingredients;
-
-    // This returns the results to the user as a string
+    const recipe = await getOneRecipe(req.params.index);
     res.send(recipe);
 
 
@@ -84,14 +121,7 @@ app.get("/get-one-recipe/:index", async (req, res) => {
 
 app.get("/get-all-recipe-names", async (req, res) => {
 
-    const data = await fs.readFile('recipes-data.json', 'utf8');
-    const recipes = JSON.parse(data);
-
-    let list = '';
-
-    for (let recipe in recipes) {
-        list += recipes[recipe].name + '\n \n';
-    }
+    const list = await getAllRecipeNames();
 
     res.send(list);
 
@@ -101,10 +131,7 @@ app.get("/get-all-recipe-names", async (req, res) => {
 
 app.get("/get-recipes-count", async (req, res) => {
 
-    const data = await fs.readFile('recipes-data.json', 'utf8');
-    const recipes = JSON.parse(data);
-
-    const listLength = `We have ${recipes.length} recipes in our cookbook! 🍰`;
+    const listLength = await getRecipesCount();
 
     res.send(listLength);
 
