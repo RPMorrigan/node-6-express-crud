@@ -19,20 +19,29 @@ app.listen(port, () => {
 // ---------------------------------
 
 // 1. getAllRecipes()
-
+// You'll see that for each helper function, we add async before 'function'.
+// This is because we're working with an API, and the api needs a moment to reply.
+// Otherwise, it will try to access data that isn't there yet.
 async function getAllRecipes() {
 
+    // This is another thing you'll see on all of our helper functions.
+    // Consider it boiler plate code. We have 'await' there to wait for a reply.
+    // 'data' takes the data from the json which is replying with standard 'utf8' characters.
+    // Then it parses it into a usable json object.
     const data = await fs.readFile('recipes-data.json', 'utf8');
     const recipes = JSON.parse(data);
 
+    // Variable ready to be loaded by for loop.
     let list = '';
     
+    // Makes a literal, formatted for easy reading.
     for (let recipe in recipes) {
         list += recipes[recipe].name.toUpperCase() + '\n'
             + 'Method: ' + recipes[recipe].cookingMethod + '.\n'
             + 'Ingredients: ' + recipes[recipe].ingredients + '.\n \n';
     }
 
+    // This is our resulting string which is passed on to the end-point.
     return list;
 
 }
@@ -42,12 +51,10 @@ async function getAllRecipes() {
 async function getOneRecipe(index) {
 
     const data = await fs.readFile('recipes-data.json', 'utf8');
-
-    // Here we're parsing our data into a data object
     const recipes = JSON.parse(data);
 
-    // I've added some formatting to make the data more legible.
-    // 'recipes[index]' accesses the specific recipe.
+    // This helper is the same as above but this one uses the index provided in the url.
+    // Though this one only returns a single recipe, which is why we don't have a 'list' variable.
     let recipe = recipes[index].name.toUpperCase() + '\n'
         + 'Method: ' + recipes[index].cookingMethod + '\n'
         + 'Ingredients: ' + recipes[index].ingredients;
@@ -66,6 +73,7 @@ async function getAllRecipeNames() {
 
     let list = '';
 
+    // This helper is also needs a 'list' variable since we're iterating and generating strings from the titles of the recipes.
     for (let recipe in recipes) {
         list += recipes[recipe].name + '\n \n';
 
@@ -82,6 +90,8 @@ async function getRecipesCount() {
     const data = await fs.readFile('recipes-data.json', 'utf8');
     const recipes = JSON.parse(data);
 
+    // I really enjoy this one as we create a cute literal.
+    // We only need a '.length' method to count out the rows in our data.
     const listLength = `We have ${recipes.length} recipes in our cookbook! 🍰`;
 
     return listLength;
@@ -94,26 +104,33 @@ async function getRecipesCount() {
 
 // 1. GET /get-all-recipes
 
+// End-points route requests and replies from the client to the server and back.
+// We can discern what type of request we're passing on by looking at 'app.get'.
+// Because 'get' is there, we can see we're sending a GET request.
+// Like our helpers, this request has to include 'async' and 'await' so that we don't throw an error.
+// 'req' is request and 'res' is response.
+// 'app' houses the 'express()' method.
+// The string is our url endpoint.
 app.get("/get-all-recipes", async (req, res) => {
 
+    // When the request is passed through we actuate the helper function 
     const list = await getAllRecipes();
+    // This is what actually sends back a usable string to the user.
     res.send(list);
 
 })
 
 // 2. GET /get-one-recipe/:index
 
-
-// Here app is actually running the express method to help set up our endpoint
-// 'get' is the request type that this endpoint makes for us.
-// '/get-one-recipe/:index' is the endpoint we type in for our request, with :index being a dynamic variable we code in later on.
-// Because we are working with a restful api, we need to make sure to add async as we have to wait for the reply from the api.
-
+// This endpoint is a little different.
+// We add a dynamic variable that our users will use in the request url.
+// ':index' is letting us know that we can choose the id number of the specific data we're looking for.
 app.get("/get-one-recipe/:index", async (req, res) => {
 
+    // You can see that our call of getOneRecipe has some params in the parenthesis.
+    // The extra bit of code in there is what's passing on the index number our user chose, to the functino.
     const recipe = await getOneRecipe(req.params.index);
     res.send(recipe);
-
 
 });
 
@@ -121,6 +138,7 @@ app.get("/get-one-recipe/:index", async (req, res) => {
 
 app.get("/get-all-recipe-names", async (req, res) => {
 
+    // Pretty simple to explain, we just get back a list of only the recipe names.
     const list = await getAllRecipeNames();
 
     res.send(list);
@@ -131,6 +149,8 @@ app.get("/get-all-recipe-names", async (req, res) => {
 
 app.get("/get-recipes-count", async (req, res) => {
 
+    // This list is a little different.
+    // Our helper gives us a count of all of the rows in our list of recipes.
     const listLength = await getRecipesCount();
 
     res.send(listLength);
